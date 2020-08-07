@@ -4,6 +4,71 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');  // 将webpack处理�
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");   // 分离css文件
 
 
+exports.getCssLoaders= function(dev){
+    return[
+        /**
+         * css 样式配置
+         */
+        {
+            test: /\.less$/,
+            use:[
+                dev?"style-loader": MiniCssExtractPlugin.loader,
+                {
+                    loader: "css-loader",
+                    options: {
+                        importLoaders: 2
+                    }
+                },
+                "less-loader",
+                "postcss-loader"
+            ],
+            exclude: /node_modules/
+        },
+        {
+            test: /\.(scss|sass)$/,
+            use:[
+                dev?"style-loader": MiniCssExtractPlugin.loader,
+                {
+                    loader: "css-loader",
+                    options: {
+                        importLoaders: 2
+                    }
+                },
+                "sass-loader",
+                "postcss-loader"
+            ],
+            exclude: /node_modules/
+        },
+        /**
+         * css 文件分开打包
+         */
+        {
+            test: /\.css$/,
+            use:[
+                dev?"style-loader": MiniCssExtractPlugin.loader,
+                {
+                    loader: "css-loader",
+                    options: {
+                        importLoaders: 1,
+                        // minimize: true,    // 是否压缩css代码
+                        // module: true
+                    }
+                },
+                "postcss-loader"
+            ],
+            exclude: /node_modules/
+        },
+        {
+            test: /\.css$/,  // 处理依赖模块包中css
+            use:[
+                dev?"style-loader": MiniCssExtractPlugin.loader,
+                "css-loader"
+            ],
+            include: /node_modules/
+        }
+    ]
+};
+
 module.exports = {
     entry: {
         main: path.resolve(__dirname,"../src/index.js")
@@ -21,69 +86,6 @@ module.exports = {
                 test: /\.(js|jsx)$/,
                 use: "babel-loader",
                 exclude: /node_modules/
-            },
-
-            /**
-             * css 样式配置
-             */
-            {
-                test: /\.less$/,
-                use:[
-                    // "style-loader",
-                    MiniCssExtractPlugin.loader,  // style-loader改用MiniCssExtractPlugin
-                    {
-                    loader: "css-loader",
-                    options: {
-                        importLoaders: 2
-                    }
-                },
-                    "less-loader",
-                    "postcss-loader"
-                ],
-                exclude: /node_modules/
-            },
-            {
-                test: /\.(scss|sass)$/,
-                use:["style-loader",
-                    {
-                        loader: "css-loader",
-                        options: {
-                            importLoaders: 2
-                        }
-                    },
-                    "sass-loader",
-                    "postcss-loader"
-                ],
-                exclude: /node_modules/
-            },
-            /**
-             * css 文件分开打包
-             */
-            {
-                test: /\.css$/,
-                use:[
-                    // "style-loader",
-                    MiniCssExtractPlugin.loader,  // style-loader改用MiniCssExtractPlugin
-                    {
-                        loader: "css-loader",
-                        options: {
-                            importLoaders: 1,
-                            // minimize: true,    // 是否压缩css代码
-                            // module: true
-                        }
-                    },
-                    "postcss-loader"
-                ],
-                exclude: /node_modules/
-            },
-            {
-                test: /\.css$/,
-                use:[
-                    "style-loader",
-                    // MiniCssExtractPlugin.loader,  // style-loader改用MiniCssExtractPlugin
-                     "css-loader"
-                ],
-                include: /node_modules/
             },
 
             /**
@@ -108,14 +110,6 @@ module.exports = {
                         outputPath: "fonts"
                     }
                 }
-            },
-            /**
-             * tyScript
-             */
-            {
-                test: /\.tsx?$/,
-                use: 'ts-loader',
-                exclude: /node_modules/
             }
         ]
     },
